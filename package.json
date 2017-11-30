@@ -1,0 +1,19 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bAmazon.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/therealizzi/bAmazon.git"
+  },
+  "author": "i.peck",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/therealizzi/bAmazon/issues"
+  },
+  "homepage": "https://github.com/therealizzi/bAmazon#readme"
+}
