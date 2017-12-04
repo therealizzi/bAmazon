@@ -74,6 +74,7 @@ function shop() {
 		console.log("\n")
 		res.forEach(function(product) {
 			t.cell('Product Id', product.id)
+			t.cell('Department', product.department)
 			t.cell('Description', product.product)
 			t.cell('Price (USD)', product.price)
 			t.cell('Quantity', product.quantity)
@@ -322,16 +323,16 @@ function overview() {
 }
 
 function departmentSales() {
-	console.log("Sales reports are under development");
+	console.log(chalk.underline.red("\nSales reports are under development\n"));
 	overview();
 }
 
 function createDepartment() {
-	console.log("New Department function under development");
+	console.log(chalk.underline.red("\nNew Department function under development\n"));
 	overview();
 }
 
 function closeDepartment() {
-	console.log("Close Department function under development");
+	console.log(chalk.underline.red("\nClose Department function under development\n"));
 	overview();
 }
