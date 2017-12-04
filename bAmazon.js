@@ -4,6 +4,7 @@
 
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var chalk = require("chalk");
 var Table = require("easy-table");
 
 var connection = mysql.createConnection({
@@ -84,7 +85,7 @@ function shop() {
 	inquirer
 		.prompt ({
 			name: "purchase",
-			message: "Which product Id would you like?",
+			message: chalk.underline.green("\nCustomer - type a product Id # to make a purchase:"),
 			validate: function(value) {
 				if (isNaN(value) === false){
 					return true;
@@ -105,30 +106,34 @@ function buy(item){
 			message: "How many do you want to buy?"
 		})
 		.then(function(answer) {
-				if (isNaN(answer.quantity)) {
+			connection.query("SELECT quantity FROM products WHERE id ="+item+";", function(err, result) {
+				console.log(result[0].quantity);
+				switch (true) {
+				case (answer.quantity < 1):
 					console.log("Please input a number");
 					buy(item);
-				} else if (answer.quantity < 1) {
-					console.log("Please input a number");
+					break;
+				case (answer.quantity > result[0].quantity):
+					console.log("I'm sorry, we don't have enough!")
 					buy(item);
-				} else 
-
-					console.log("\nYou purchased: "+answer.quantity+" of product #"+item)
-					console.log("\nYour purchase is ready!\n");
+					break;
+				case (answer.quantity <= result[0].quantity):
+					console.log(chalk.blue.bold("\nYou purchased: "+answer.quantity+" of product #"+item));
 					reduceItems(item, answer.quantity);
-					
 					inquirer
 						.prompt({
 							name: "next",
-							type: "string",
-							message: "Keep shopping, y/n?"
+							type: "confirm",
+							message: "Keep shopping?"
 						})
 						.then(function(answer) {
-							if (answer.next == "y") {
+							if (answer.next) {
 								shop()
 							} else (initiate())
 						});
-			})
+				}
+			});
+		})
 }
 
 function reduceItems(item, quantity) {
@@ -144,7 +149,7 @@ function manage() {
 		.prompt ({
 			name: "manage",
 			type: "rawlist",
-			message: "What would you like to do?",
+			message: "\nManager - here are your options:",
 			choices: [
 			"See product inventory",
 			"See low inventory items",
@@ -224,39 +229,60 @@ function addInventory() {
 
 	inquirer
 		.prompt ({
-			name: "add_product",
+			name: "restock_product",
 			type: "input",
-			message: "Type the name of the product you want to re-stock:"
+			message: "Type the Id of the product you want to re-stock:"
 		})
 		.then(function(answer) {
 
-	connection.query("UPDATE bamazon_db.products SET quantity = quantity + 1 WHERE product ="+"'"+answer.add_product+"'", function(err, res)  {
-		if (err) throw err;
+			connection.query("UPDATE products SET quantity = quantity + 5 WHERE id ="+answer.restock_product, function(err, res)  {
+			if (err) throw err;
 
-		allInventory();
-		})
-
-
-
-		var t = new Table;
-
-		res.forEach(function(product) {
-			t.cell('Product Id', product.id)
-			t.cell('Description', product.product)
-			t.cell('Price', product.price)
-			t.cell('Quantity', product.quantity)
-			t.newRow()
-		})
-
-		console.log("\n")
-		console.log(t.toString())
-		manage();
+			allInventory();
+			})
 		}
 	)
 }
 
 function addProduct() {
-	//
+	console.log("\nTo add a new product, please complete this form:")
+	
+	inquirer
+		.prompt ([
+		{
+			type: "input",
+			name: "product",
+			message: "What is the name of the product you're adding?"
+		},
+		{
+			type: "input",
+			name: "quantity",
+			message: "How many are you adding?"
+		},
+		{
+			type: "input",
+			name: "price",
+			message: "What is the price?"
+		}])
+
+		.then(function(answer) {
+
+		var query = connection.query(
+			"INSERT INTO products SET ?",
+			[
+				{
+					product: answer.product,
+					quantity: answer.quantity,
+					price: answer.price
+				}
+			],
+			function(err, res) {
+				console.log(res.affectedRows + " products added \n");
+				allInventory();
+			}
+		);
+
+	})
 }
 
 // ---------- Supervisor Section ----------
@@ -270,7 +296,8 @@ function overview() {
 			choices: [
 				"View Product Sales By Department",
 				"Create New Department",
-				"Close Department"
+				"Close Department",
+				"Return to main"
 			]
 		})
 		.then(function(answer) {
@@ -286,18 +313,25 @@ function overview() {
 				case "Close Department":
 					closeDepartment();
 					break;
+
+				case "Return to main":
+					initiate();
+					break;
 			}
 		})
 }
 
 function departmentSales() {
-	//
+	console.log("Sales reports are under development");
+	overview();
 }
 
 function createDepartment() {
-	//
+	console.log("New Department function under development");
+	overview();
 }
 
 function closeDepartment() {
-
+	console.log("Close Department function under development");
+	overview();
 }
